@@ -31,6 +31,7 @@ private:
     std::string _process_name;
     EKittyMemOP _eMemOp;
     std::unique_ptr<IKittyMemOp> _pMemOp;
+    std::unique_ptr<IKittyMemOp> _pMemOp2nd; // scondary mem op
     std::unique_ptr<IKittyMemOp> _pMemOpPatch;
 
 public:

@@ -50,7 +50,7 @@ std::vector<uintptr_t> KittyScannerMgr::findBytesAll(const uintptr_t start, cons
     if (!_pMem->Read(start, &buf[0], buf.size()))
     {
         KITTY_LOGE("findBytesAll: failed to read into buffer.");
-        return local_list;
+        //return local_list;
     }
 
     uintptr_t curr_search_address = (uintptr_t)&buf[0];

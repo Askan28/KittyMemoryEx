@@ -26,6 +26,9 @@ bool KittyMemoryMgr::initialize(pid_t pid, EKittyMemOP eMemOp, bool initMemPatch
     case EK_MEM_OP_IO:
         _pMemOp = std::make_unique<KittyMemIO>();
         break;
+    case EK_MEM_OP_KERNEL:
+        _pMemOp = std::make_unique<KittyMemKernel>();
+        break;
     default:
         KITTY_LOGE("KittyMemoryMgr: Unknown memory operation.");
         return false;
@@ -65,8 +68,28 @@ bool KittyMemoryMgr::initialize(pid_t pid, EKittyMemOP eMemOp, bool initMemPatch
         }
     }
 
-    memScanner = KittyScannerMgr(_pMemOp.get());
-    elfScanner = ElfScannerMgr(_pMemOp.get());
+    // snanner mem only avaialabe for SYS operation
+    if (eMemOp == EK_MEM_OP_KERNEL)
+    {
+        if (_pMemOp2nd.get())
+            _pMemOp2nd.reset();
+
+        _pMemOp2nd = std::make_unique<KittyMemSys>();
+        if (_pMemOp2nd->init(pid))
+        {
+            memScanner = KittyScannerMgr(_pMemOp2nd.get());
+            elfScanner = ElfScannerMgr(_pMemOp2nd.get());
+        }
+        else
+        {
+            KITTY_LOGW("KittyMemoryMgr: Couldn't initialize IO memory operation for memory scanning.");
+        }
+    }
+    else
+    {
+        memScanner = KittyScannerMgr(_pMemOp.get());
+        elfScanner = ElfScannerMgr(_pMemOp.get());
+    }
 
 #ifdef __ANDROID__
     // refs https://fadeevab.com/shared-library-injection-on-android-8/
